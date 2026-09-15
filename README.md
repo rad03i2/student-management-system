@@ -19,3 +19,8 @@ A small educational management system prototype for practicing object-oriented p
 javac src/*.java
 java -cp src Main
 ```
+
+## Official links
+
+- Portfolio: https://rdwan.dev
+- Project page: https://rdwan.dev/projects/09-student-management-system.html
