@@ -1,0 +1,8 @@
+package io.github.rad03i2.sms;
+
+import java.nio.file.*;
+
+public final class StudentManagementTest {
+    public static void main(String[] args)throws Exception{Path d=Files.createTempDirectory("sms-test-");try{var s=new StudentService(new Store(d));s.addStudent(new Student("S1","رضوان أحمد","r@example.com"));s.addCourse(new Course("C1","Environment",3));s.enroll("S1","C1");s.grade("S1","C1",95);check(s.students().size()==1,"student persisted");check(s.courses().size()==1,"course persisted");check(s.enrollmentsForStudent("S1").get(0).grade()==95,"grade persisted");check(Math.abs(s.gpa("S1")-4.0)<0.001,"gpa");var reloaded=new StudentService(new Store(d));check(reloaded.student("s1").name().equals("رضوان أحمد"),"UTF-8 reload");expect(()->s.addStudent(new Student("S2","Other","R@example.com")),"duplicate email");expect(()->s.addStudent(new Student("S1","Again","x@example.com")),"duplicate id");expect(()->s.removeStudent("S1"),"referential integrity");expect(()->s.grade("S1","C1",101),"grade range");s.unenroll("S1","C1");s.removeStudent("S1");s.removeCourse("C1");check(s.students().isEmpty()&&s.courses().isEmpty(),"cleanup");System.out.println("All integration tests passed.");}finally{try(var w=Files.walk(d)){w.sorted((a,b)->b.compareTo(a)).forEach(p->{try{Files.deleteIfExists(p);}catch(Exception ignored){}});}}}
+    private static void check(boolean v,String m){if(!v)throw new AssertionError(m);}private static void expect(Throwing r,String m)throws Exception{try{r.run();throw new AssertionError("Expected failure: "+m);}catch(IllegalArgumentException expected){}}@FunctionalInterface interface Throwing{void run()throws Exception;}
+}

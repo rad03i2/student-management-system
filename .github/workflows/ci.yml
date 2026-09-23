@@ -1,0 +1,28 @@
+name: CI
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        java: ['17', '21']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+      - run: mvn --batch-mode clean package
+      - name: Run integration test harness
+        run: java -cp target/test-classes:target/classes io.github.rad03i2.sms.StudentManagementTest
+        if: runner.os != 'Windows'
+      - name: Run integration test harness (Windows)
+        run: java -cp "target/test-classes;target/classes" io.github.rad03i2.sms.StudentManagementTest
+        if: runner.os == 'Windows'
+      - run: java -jar target/student-management-system-1.0.0.jar --version
